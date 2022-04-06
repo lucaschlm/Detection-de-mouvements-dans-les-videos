@@ -3,19 +3,29 @@
 using namespace cv;
 int main()
 {
+
 	VideoCapture video("video/111.mp4");
 
-	if (!video.isOpened()) {
+	if (!video.isOpened()) 
+    {
 		std::cerr << "Error opening video stream or file" << std::endl;
 		exit(EXIT_FAILURE);
 	}        
     
+    //On crée notre backgroundSubstractor
+    Ptr<BackgroundSubtractorMOG2> pBackSub = createBackgroundSubtractorMOG2();
+    pBackSub->setVarThreshold(100);
+    pBackSub->setDetectShadows(true);
+    pBackSub->setNMixtures(3);
+    pBackSub->setShadowValue(0);
+    pBackSub->setBackgroundRatio(.5);
+
     Mat firstFrame;
     // On recupere la premiere frame qui correspond à l'image de fond
     video >> firstFrame;
 
-    while (true) {
-
+    while (true) 
+    {
         Mat frame;
         // On recupere une frame
         video >> frame;
@@ -24,17 +34,29 @@ int main()
         if (frame.empty())
             break;
 
-        // On calcul l'image seuillé
-        Mat tresholdFrame = imgTreshold(frame, firstFrame, 40);
-
         // On affiche la frame
         imshow("Frame", frame);
 
+        ///////////////////////////////////////////////////////
+        //                 SEUILLAGE SIMPLE                 //
+        /////////////////////////////////////////////////////
+        // On calcul l'image seuillé
+        Mat tresholdFrame = imgTreshold(frame, firstFrame, 40);
         //On affiche la frame seuillé
-        imshow("Tresholded frame", tresholdFrame);
+        imshow("Tresholded frame (Simple)", tresholdFrame);
 
-        // On ferme la video lors de l'appuie sur la touche ESC
+        ///////////////////////////////////////////////////////
+        //                 MODELE GAUSSIEN                  //
+        /////////////////////////////////////////////////////
+        // On applique le masque
+        Mat fgMask;
+        pBackSub->apply(frame, fgMask);
+        //On affiche la frame seuillé 
+        imshow("Tresholded frame (MOG2)", fgMask);
+
+
         char c = (char)waitKey(25);
+        // On ferme la video lors de l'appuie sur la touche ESC
         if (c == 27)
             break;
     }
@@ -45,4 +67,7 @@ int main()
     destroyAllWindows();
 
 	return 0;
-}
+}
+
+
+//TODO : QUESTION 2.3 : Recuperer pour chaque pixel dans un fichier csv et analyser avec graphique Excel
