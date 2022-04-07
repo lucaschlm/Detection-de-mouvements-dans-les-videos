@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include "functions.h"
+#include <chrono>
 using namespace cv;
 int main()
 {
@@ -24,6 +25,9 @@ int main()
     // On recupere la premiere frame qui correspond à l'image de fond
     video >> firstFrame;
 
+    auto frameNb = video.get(CAP_PROP_FRAME_COUNT);
+    std::chrono::milliseconds simpleTime(0);
+    std::chrono::milliseconds gaussianTime(0);
     while (true) 
     {
         Mat frame;
@@ -40,8 +44,11 @@ int main()
         ///////////////////////////////////////////////////////
         //                 SEUILLAGE SIMPLE                 //
         /////////////////////////////////////////////////////
+        auto start = std::chrono::high_resolution_clock::now();
         // On calcul l'image seuillé
         Mat tresholdFrame = imgTreshold(frame, firstFrame, 40);
+        auto stop = std::chrono::high_resolution_clock::now();
+        simpleTime += std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
         //On affiche la frame seuillé
         imshow("Tresholded frame (Simple)", tresholdFrame);
 
@@ -49,8 +56,11 @@ int main()
         //                 MODELE GAUSSIEN                  //
         /////////////////////////////////////////////////////
         // On applique le masque
+        start = std::chrono::high_resolution_clock::now();
         Mat fgMask;
         pBackSub->apply(frame, fgMask);
+        stop = std::chrono::high_resolution_clock::now();
+        gaussianTime += std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
         //On affiche la frame seuillé 
         imshow("Tresholded frame (MOG2)", fgMask);
 
@@ -65,6 +75,12 @@ int main()
     video.release();
 
     destroyAllWindows();
+
+    std::cout << "Temps d'execution moyen pour le seuillage simple : " << (simpleTime / frameNb).count() << "ms.\n";
+    std::cout << "Temps d'execution moyen pour le seuillage gaussien : " << (gaussianTime / frameNb).count() << "ms.\n";
+    std::cout << "Le temps d'execution du seuillage simple est environ "
+        << std::round((simpleTime / frameNb).count() / (gaussianTime / frameNb).count())
+        << "x superieur au temps d'execution du seuillage gaussien.\n";
 
 	return 0;
 }
