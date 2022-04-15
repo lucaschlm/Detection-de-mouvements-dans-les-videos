@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include "functions.h"
 #include <chrono>
+#include <iomanip>
 using namespace cv;
 int main()
 {
@@ -25,9 +26,12 @@ int main()
     // On recupere la premiere frame qui correspond à l'image de fond
     video >> firstFrame;
 
+    //On recupere le nombre d'images dans la video pour calculer la moyenne de temps d'execution
     auto frameNb = video.get(CAP_PROP_FRAME_COUNT);
+
     std::chrono::milliseconds simpleTime(0);
     std::chrono::milliseconds gaussianTime(0);
+
     while (true) 
     {
         Mat frame;
@@ -73,17 +77,14 @@ int main()
 
     // On ferme la video
     video.release();
+    cv::destroyAllWindows();
 
-    destroyAllWindows();
-
-    std::cout << "Temps d'execution moyen pour le seuillage simple : " << (simpleTime / frameNb).count() << "ms.\n";
-    std::cout << "Temps d'execution moyen pour le seuillage gaussien : " << (gaussianTime / frameNb).count() << "ms.\n";
-    std::cout << "Le temps d'execution du seuillage simple est environ "
-        << std::round((simpleTime / frameNb).count() / (gaussianTime / frameNb).count())
-        << "x superieur au temps d'execution du seuillage gaussien.\n";
+    std::cout << "Temps d'execution moyen pour le seuillage simple : \x1B[1;32m" << (simpleTime / frameNb).count() << "ms\x1B[0m.\n";
+    std::cout << "Temps d'execution moyen pour le seuillage gaussien : \x1B[1;32m" << (gaussianTime / frameNb).count() << "ms\x1B[0m.\n";
+    std::cout << "Le temps d'execution du seuillage simple est environ \x1B[1;32m";
+    std::cout << std::setprecision(2) << (simpleTime / frameNb).count() / (gaussianTime / frameNb).count()
+        << "x\x1B[0m superieur au temps d'execution du seuillage gaussien.\n";
 
 	return 0;
 }
 
-
-//TODO : QUESTION 2.3 : Recuperer pour chaque pixel dans un fichier csv et analyser avec graphique Excel
