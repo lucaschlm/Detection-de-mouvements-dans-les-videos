@@ -14,7 +14,7 @@
 
 - Si vous utilisez une autre version d'OpenCV que celle recommandée au début du README, il faudra changer la librairie comme ci-après
 <img width="589" alt="image" src="https://user-images.githubusercontent.com/42523430/215990709-019a8c11-d978-4883-9fc0-456c7b34339a.png">
-Si vous utilisez par exemple la version 4.5.5, il faut remplacer *opencv_world460d.lib* par *opencv_world455d.lib*
+Si vous utilisez par exemple la version 4.5.5, il faut remplacer opencv_world460d.lib par opencv_world455d.lib
 
 ## Fichiers à ajouter pour le bon fonctionnement d'OpenCV
 
